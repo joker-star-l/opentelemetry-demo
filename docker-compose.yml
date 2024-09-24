@@ -536,16 +536,16 @@ services:
   # ********************
   # Telemetry Components
   # ********************
-  # Jaeger
+  # jaeger  
   jaeger:
-    image: ${JAEGERTRACING_IMAGE}
+    image: ${JAEGERDORIS_IMAGE}
     container_name: jaeger
-    command:
-      - "--memory.max-traces=5000"
-      - "--query.base-path=/jaeger/ui"
-      - "--prometheus.server-url=http://${PROMETHEUS_ADDR}"
-      - "--prometheus.query.normalize-calls=true"
-      - "--prometheus.query.normalize-duration=true"
+    # command:
+    #   - "--memory.max-traces=5000"
+    #   - "--query.base-path=/jaeger/ui"
+    #   - "--prometheus.server-url=http://${PROMETHEUS_ADDR}"
+    #   - "--prometheus.query.normalize-calls=true"
+    #   - "--prometheus.query.normalize-duration=true"
     deploy:
       resources:
         limits:
@@ -553,25 +553,13 @@ services:
     restart: unless-stopped
     ports:
       - "${JAEGER_SERVICE_PORT}"         # Jaeger UI
-      - "${OTEL_COLLECTOR_PORT_GRPC}"
-    environment:
-      - METRICS_STORAGE_TYPE=prometheus
+    # environment:
+    #   - METRICS_STORAGE_TYPE=prometheus
+    volumes:
+      - ./src/jaegerdoris/config.yaml:/etc/jaeger/config.yaml
+    depends_on:
+      - doris
     logging: *logging
-  
-  # jaeger-doris:
-  #   image: composer000/jaeger-doris:v1.59.0
-  #   container_name: jaeger-doris
-  #   deploy:
-  #     resources:
-  #       limits:
-  #         memory: 200M
-  #   restart: unless-stopped
-  #   command: ["--config=/config.yaml"]
-  #   volumes:
-  #     - /home/liumx/GoProjects/jaeger-doris/config.yaml:/config.yaml
-  #   depends_on:
-  #     - doris
-  #   logging: *logging
 
   # Grafana
   grafana:
@@ -603,7 +591,7 @@ services:
 
   # doris-client
   doris-client:
-    image: ubuntu-with-mysql-client:22.04
+    image: ${DORIS_CLIENT_IMAGE}
     container_name: doris-client
     command: /bin/bash -c "while true; do sleep 10; done"
     logging: *logging

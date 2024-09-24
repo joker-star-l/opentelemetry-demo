@@ -1,0 +1,472 @@
+{
+    "annotations": {
+      "list": [
+        {
+          "builtIn": 1,
+          "datasource": {
+            "type": "grafana",
+            "uid": "-- Grafana --"
+          },
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "type": "dashboard"
+        }
+      ]
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 0,
+    "id": 8,
+    "links": [],
+    "panels": [
+      {
+        "datasource": {
+          "type": "mysql",
+          "uid": "webstore"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisBorderShow": false,
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "insertNulls": false,
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 9,
+          "w": 24,
+          "x": 0,
+          "y": 0
+        },
+        "id": 1,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "dataset": "__internal_schema",
+            "datasource": {
+              "type": "mysql",
+              "uid": "webstore"
+            },
+            "editorMode": "code",
+            "format": "table",
+            "rawQuery": true,
+            "rawSql": "select\r\n    $__time(timestamp),\r\n    value\r\nfrom otel.otel_metrics_gauge\r\nWHERE metric_name = '$metric_gauge'\r\nand service_name = '$service_name'\r\nand $__timeFilter(timestamp)\r\n;",
+            "refId": "A",
+            "sql": {
+              "columns": [
+                {
+                  "parameters": [],
+                  "type": "function"
+                }
+              ],
+              "groupBy": [
+                {
+                  "property": {
+                    "type": "string"
+                  },
+                  "type": "groupBy"
+                }
+              ],
+              "limit": 50
+            }
+          }
+        ],
+        "title": "Metrics Gauge",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "mysql",
+          "uid": "webstore"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisBorderShow": false,
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "insertNulls": false,
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 24,
+          "x": 0,
+          "y": 9
+        },
+        "id": 2,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "dataset": "__internal_schema",
+            "datasource": {
+              "type": "mysql",
+              "uid": "webstore"
+            },
+            "editorMode": "code",
+            "format": "table",
+            "rawQuery": true,
+            "rawSql": "select\r\n    $__time(timestamp),\r\n    value\r\nfrom otel.otel_metrics_sum\r\nWHERE metric_name = '$metric_sum'\r\nand service_name = '$service_name'\r\nand $__timeFilter(timestamp)\r\n;",
+            "refId": "A",
+            "sql": {
+              "columns": [
+                {
+                  "parameters": [],
+                  "type": "function"
+                }
+              ],
+              "groupBy": [
+                {
+                  "property": {
+                    "type": "string"
+                  },
+                  "type": "groupBy"
+                }
+              ],
+              "limit": 50
+            }
+          }
+        ],
+        "title": "Metrics Sum",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "mysql",
+          "uid": "webstore"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "scaleDistribution": {
+                "type": "linear"
+              }
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 10,
+          "w": 24,
+          "x": 0,
+          "y": 17
+        },
+        "id": 3,
+        "options": {
+          "calculate": false,
+          "cellGap": 1,
+          "color": {
+            "exponent": 0.5,
+            "fill": "dark-orange",
+            "mode": "scheme",
+            "reverse": false,
+            "scale": "exponential",
+            "scheme": "Spectral",
+            "steps": 64
+          },
+          "exemplars": {
+            "color": "rgba(255,0,255,0.7)"
+          },
+          "filterValues": {
+            "le": 1e-9
+          },
+          "legend": {
+            "show": true
+          },
+          "rowsFrame": {
+            "layout": "auto"
+          },
+          "tooltip": {
+            "mode": "single",
+            "showColorScale": false,
+            "yHistogram": false
+          },
+          "yAxis": {
+            "axisPlacement": "left",
+            "reverse": false
+          }
+        },
+        "pluginVersion": "10.4.3",
+        "targets": [
+          {
+            "dataset": "__internal_schema",
+            "datasource": {
+              "type": "mysql",
+              "uid": "webstore"
+            },
+            "editorMode": "code",
+            "format": "table",
+            "rawQuery": true,
+            "rawSql": "select\r\n    $__time(timestamp),\r\n    concat('{', array_join(array_map((x, y) -> concat(json_quote(y), ':', x), bucket_counts, array_pushback(cast(explicit_bounds as array<string>), '+inf')), ','), '}') as buckets\r\nfrom otel.otel_metrics_histogram\r\nWHERE metric_name = '$metric_histogram'\r\nand service_name = '$service_name'\r\nand $__timeFilter(timestamp)\r\n;",
+            "refId": "A",
+            "sql": {
+              "columns": [
+                {
+                  "parameters": [],
+                  "type": "function"
+                }
+              ],
+              "groupBy": [
+                {
+                  "property": {
+                    "type": "string"
+                  },
+                  "type": "groupBy"
+                }
+              ],
+              "limit": 50
+            }
+          }
+        ],
+        "title": "Metrics Histogram",
+        "transformations": [
+          {
+            "id": "extractFields",
+            "options": {
+              "format": "auto",
+              "source": "buckets"
+            }
+          }
+        ],
+        "type": "heatmap"
+      }
+    ],
+    "refresh": "",
+    "schemaVersion": 39,
+    "tags": [],
+    "templating": {
+      "list": [
+        {
+          "current": {
+            "selected": false,
+            "text": "recommendationservice",
+            "value": "recommendationservice"
+          },
+          "datasource": {
+            "type": "mysql",
+            "uid": "webstore"
+          },
+          "definition": "select service_name from otel.otel_metrics_gauge group by service_name\nunion\nselect service_name from otel.otel_metrics_sum group by service_name\nunion\nselect service_name from otel.otel_metrics_histogram group by service_name",
+          "description": "service_name",
+          "hide": 0,
+          "includeAll": false,
+          "label": "service_name",
+          "multi": false,
+          "name": "service_name",
+          "options": [],
+          "query": "select service_name from otel.otel_metrics_gauge group by service_name\nunion\nselect service_name from otel.otel_metrics_sum group by service_name\nunion\nselect service_name from otel.otel_metrics_histogram group by service_name",
+          "refresh": 1,
+          "regex": "",
+          "skipUrlSync": false,
+          "sort": 0,
+          "type": "query"
+        },
+        {
+          "current": {
+            "selected": false,
+            "text": "system.memory.utilization",
+            "value": "system.memory.utilization"
+          },
+          "datasource": {
+            "type": "mysql",
+            "uid": "webstore"
+          },
+          "definition": "select distinct metric_name from otel.otel_metrics_gauge where service_name = '$service_name'",
+          "description": "metric_gauge",
+          "hide": 0,
+          "includeAll": false,
+          "label": "metric_gauge",
+          "multi": false,
+          "name": "metric_gauge",
+          "options": [],
+          "query": "select distinct metric_name from otel.otel_metrics_gauge where service_name = '$service_name'",
+          "refresh": 1,
+          "regex": "",
+          "skipUrlSync": false,
+          "sort": 0,
+          "type": "query"
+        },
+        {
+          "current": {
+            "selected": false,
+            "text": "traces.span.metrics.calls",
+            "value": "traces.span.metrics.calls"
+          },
+          "datasource": {
+            "type": "mysql",
+            "uid": "webstore"
+          },
+          "definition": "select distinct metric_name from otel.otel_metrics_sum where service_name='$service_name'",
+          "description": "metric_sum",
+          "hide": 0,
+          "includeAll": false,
+          "label": "metric_sum",
+          "multi": false,
+          "name": "metric_sum",
+          "options": [],
+          "query": "select distinct metric_name from otel.otel_metrics_sum where service_name='$service_name'",
+          "refresh": 1,
+          "regex": "",
+          "skipUrlSync": false,
+          "sort": 0,
+          "type": "query"
+        },
+        {
+          "current": {
+            "selected": false,
+            "text": "traces.span.metrics.duration",
+            "value": "traces.span.metrics.duration"
+          },
+          "datasource": {
+            "type": "mysql",
+            "uid": "webstore"
+          },
+          "definition": "select distinct metric_name from otel.otel_metrics_histogram where service_name = '$service_name'",
+          "description": "metric_histogram",
+          "hide": 0,
+          "includeAll": false,
+          "label": "metric_histogram",
+          "multi": false,
+          "name": "metric_histogram",
+          "options": [],
+          "query": "select distinct metric_name from otel.otel_metrics_histogram where service_name = '$service_name'",
+          "refresh": 1,
+          "regex": "",
+          "skipUrlSync": false,
+          "sort": 0,
+          "type": "query"
+        }
+      ]
+    },
+    "time": {
+      "from": "now-6h",
+      "to": "now"
+    },
+    "timepicker": {},
+    "timezone": "browser",
+    "title": "Metrics",
+    "uid": "edyv29fpqd3b4b",
+    "version": 10,
+    "weekStart": ""
+  }
+  
