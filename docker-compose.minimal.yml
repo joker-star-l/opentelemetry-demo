@@ -268,6 +268,7 @@ services:
       - ENVOY_PORT
       - FLAGD_HOST
       - FLAGD_PORT
+      - DORIS_SERVICE_HOST
     depends_on:
       frontend:
         condition: service_started
@@ -276,6 +277,8 @@ services:
       jaeger:
         condition: service_started
       grafana:
+        condition: service_started
+      doris:
         condition: service_started
 
   # Imageprovider
@@ -554,6 +557,21 @@ services:
     environment:
       - METRICS_STORAGE_TYPE=prometheus
     logging: *logging
+  
+  # jaeger-doris:
+  #   image: composer000/jaeger-doris:v1.59.0
+  #   container_name: jaeger-doris
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         memory: 200M
+  #   restart: unless-stopped
+  #   command: ["--config=/config.yaml"]
+  #   volumes:
+  #     - /home/liumx/GoProjects/jaeger-doris/config.yaml:/config.yaml
+  #   depends_on:
+  #     - doris
+  #   logging: *logging
 
   # Grafana
   grafana:
@@ -571,6 +589,23 @@ services:
       - ./src/grafana/provisioning/:/etc/grafana/provisioning/
     ports:
       - "${GRAFANA_SERVICE_PORT}"
+    logging: *logging
+
+  # doris
+  doris:
+    image: ${DORIS_IMAGE}
+    container_name: doris
+    restart: unless-stopped
+    ports:
+      - "${DORIS_SERVICE_PORT_HTTP}"
+      - "${DORIS_SERVICE_PORT_MYSQL}"
+    logging: *logging
+
+  # doris-client
+  doris-client:
+    image: ubuntu-with-mysql-client:22.04
+    container_name: doris-client
+    command: /bin/bash -c "while true; do sleep 10; done"
     logging: *logging
 
   # OpenTelemetry Collector
@@ -591,6 +626,7 @@ services:
       - "${OTEL_COLLECTOR_PORT_HTTP}"
     depends_on:
       - jaeger
+      - doris
     logging: *logging
     environment:
       - ENVOY_PORT
