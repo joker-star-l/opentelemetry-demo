@@ -1,212 +1,325 @@
 {
-    "annotations": {
-      "list": [
-        {
-          "builtIn": 1,
-          "datasource": {
-            "type": "grafana",
-            "uid": "-- Grafana --"
-          },
-          "enable": true,
-          "hide": true,
-          "iconColor": "rgba(0, 211, 255, 1)",
-          "name": "Annotations & Alerts",
-          "type": "dashboard"
-        }
-      ]
-    },
-    "editable": true,
-    "fiscalYearStartMonth": 0,
-    "graphTooltip": 0,
-    "id": 6,
-    "links": [],
-    "panels": [
+  "annotations": {
+    "list": [
       {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "webstore"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "bars",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "dataset": "__internal_schema",
+          "datasource": {
+            "type": "mysql",
+            "uid": "webstore"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "select \r\n$__timeGroup(timestamp,'30m') as time,\r\ncount(*) as count\r\nfrom\r\notel_logs\r\nwhere $__timeFilter(timestamp)\r\ngroup by time\r\n;\r\n",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Logs",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "webstore"
+      },
+      "description": "",
+      "gridPos": {
+        "h": 16,
+        "w": 24,
+        "x": 0,
+        "y": 7
+      },
+      "id": 1,
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
+        "showLabels": false,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": false
+      },
+      "targets": [
+        {
+          "dataset": "__internal_schema",
+          "datasource": {
+            "type": "mysql",
+            "uid": "webstore"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "select\r\n    $__time(timestamp),\r\n    body,\r\n    severity_text as level,\r\n    service_name as serviceName,\r\n    trace_id as traceID,\r\n    span_id as spanID,\r\n    log_attributes as logAttributes,\r\n    resource_attributes as resourceAttributes\r\nfrom otel_logs\r\nwhere $__timeFilter(timestamp)\r\nand (\r\n  \"$service_name\" = \"'all'\" or \r\n  service_name in ($service_name)\r\n)\r\nand (\r\n  '$match_value' = '' or\r\n  body $match '$match_value'\r\n)\r\nlimit 1000\r\n;\r\n",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Logs",
+      "transformations": [
+        {
+          "id": "extractFields",
+          "options": {
+            "format": "json",
+            "jsonPaths": [],
+            "keepTime": false,
+            "replace": false,
+            "source": "logAttributes"
+          }
+        },
+        {
+          "id": "extractFields",
+          "options": {
+            "format": "json",
+            "source": "resourceAttributes"
+          }
+        }
+      ],
+      "type": "logs"
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 39,
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "allValue": "'all'",
+        "current": {
+          "selected": true,
+          "text": [
+            "adservice"
+          ],
+          "value": [
+            "adservice"
+          ]
+        },
         "datasource": {
           "type": "mysql",
           "uid": "webstore"
         },
-        "description": "",
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "palette-classic"
-            },
-            "custom": {
-              "axisBorderShow": false,
-              "axisCenteredZero": false,
-              "axisColorMode": "text",
-              "axisLabel": "",
-              "axisPlacement": "auto",
-              "barAlignment": 0,
-              "drawStyle": "bars",
-              "fillOpacity": 0,
-              "gradientMode": "none",
-              "hideFrom": {
-                "legend": false,
-                "tooltip": false,
-                "viz": false
-              },
-              "insertNulls": false,
-              "lineInterpolation": "linear",
-              "lineWidth": 1,
-              "pointSize": 5,
-              "scaleDistribution": {
-                "type": "linear"
-              },
-              "showPoints": "auto",
-              "spanNulls": false,
-              "stacking": {
-                "group": "A",
-                "mode": "none"
-              },
-              "thresholdsStyle": {
-                "mode": "off"
-              }
-            },
-            "mappings": [],
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "green",
-                  "value": null
-                },
-                {
-                  "color": "red",
-                  "value": 80
-                }
-              ]
-            }
-          },
-          "overrides": []
-        },
-        "gridPos": {
-          "h": 7,
-          "w": 24,
-          "x": 0,
-          "y": 0
-        },
-        "id": 2,
-        "options": {
-          "legend": {
-            "calcs": [],
-            "displayMode": "list",
-            "placement": "bottom",
-            "showLegend": true
-          },
-          "tooltip": {
-            "mode": "single",
-            "sort": "none"
-          }
-        },
-        "targets": [
-          {
-            "dataset": "__internal_schema",
-            "datasource": {
-              "type": "mysql",
-              "uid": "webstore"
-            },
-            "editorMode": "code",
-            "format": "table",
-            "rawQuery": true,
-            "rawSql": "select \r\n$__time(timestamp),\r\n1 as count\r\nfrom \r\notel.otel_logs\r\nWHERE $__timeFilter(timestamp)\r\nLIMIT 1000\r\n;",
-            "refId": "A",
-            "sql": {
-              "columns": [
-                {
-                  "parameters": [],
-                  "type": "function"
-                }
-              ],
-              "groupBy": [
-                {
-                  "property": {
-                    "type": "string"
-                  },
-                  "type": "groupBy"
-                }
-              ],
-              "limit": 50
-            }
-          }
-        ],
-        "title": "Logs",
-        "type": "timeseries"
+        "definition": "select service_name from otel_logs group by service_name;",
+        "description": "service_name",
+        "hide": 0,
+        "includeAll": true,
+        "label": "service_name",
+        "multi": true,
+        "name": "service_name",
+        "options": [],
+        "query": "select service_name from otel_logs group by service_name;",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
       },
       {
-        "datasource": {
-          "type": "mysql",
-          "uid": "webstore"
+        "current": {
+          "selected": false,
+          "text": "MATCH_ANY",
+          "value": "MATCH_ANY"
         },
-        "description": "",
-        "gridPos": {
-          "h": 16,
-          "w": 24,
-          "x": 0,
-          "y": 7
-        },
-        "id": 1,
-        "options": {
-          "dedupStrategy": "none",
-          "enableLogDetails": true,
-          "prettifyLogMessage": true,
-          "showCommonLabels": false,
-          "showLabels": false,
-          "showTime": true,
-          "sortOrder": "Descending",
-          "wrapLogMessage": false
-        },
-        "targets": [
+        "description": "match",
+        "hide": 1,
+        "includeAll": false,
+        "label": "match",
+        "multi": false,
+        "name": "match",
+        "options": [
           {
-            "dataset": "__internal_schema",
-            "datasource": {
-              "type": "mysql",
-              "uid": "webstore"
-            },
-            "editorMode": "code",
-            "format": "table",
-            "rawQuery": true,
-            "rawSql": "select\r\n    $__time(timestamp),\r\n    body,\r\n    severity_text as level,\r\n    trace_id as traceID,\r\n    span_id as spanID,\r\n    log_attributes as logAttributes\r\nfrom otel.otel_logs\r\nwhere $__timeFilter(timestamp)\r\n  -- and service_name = '$service_name'\r\n  -- and ('$match_value' = '' or body $match '$match_value') -- or 性能差\r\nlimit 1000\r\n;\r\n",
-            "refId": "A",
-            "sql": {
-              "columns": [
-                {
-                  "parameters": [],
-                  "type": "function"
-                }
-              ],
-              "groupBy": [
-                {
-                  "property": {
-                    "type": "string"
-                  },
-                  "type": "groupBy"
-                }
-              ],
-              "limit": 50
-            }
+            "selected": true,
+            "text": "MATCH_ANY",
+            "value": "MATCH_ANY"
+          },
+          {
+            "selected": false,
+            "text": "MATCH_ALL",
+            "value": "MATCH_ALL"
+          },
+          {
+            "selected": false,
+            "text": "MATCH_PHRASE",
+            "value": "MATCH_PHRASE"
+          },
+          {
+            "selected": false,
+            "text": "MATCH_PHRASE_PREFIX",
+            "value": "MATCH_PHRASE_PREFIX"
+          },
+          {
+            "selected": false,
+            "text": "MATCH_REGEXP",
+            "value": "MATCH_REGEXP"
           }
         ],
-        "title": "Logs",
-        "type": "logs"
+        "query": "MATCH_ANY,MATCH_ALL,MATCH_PHRASE,MATCH_PHRASE_PREFIX,MATCH_REGEXP",
+        "queryValue": "",
+        "skipUrlSync": false,
+        "type": "custom"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "",
+          "value": ""
+        },
+        "description": "match_value",
+        "hide": 1,
+        "label": "match_value",
+        "name": "match_value",
+        "options": [
+          {
+            "selected": true,
+            "text": "",
+            "value": ""
+          }
+        ],
+        "query": "",
+        "skipUrlSync": false,
+        "type": "textbox"
       }
-    ],
-    "refresh": "",
-    "schemaVersion": 39,
-    "tags": [],
-    "templating": {
-      "list": []
-    },
-    "time": {
-      "from": "now-6h",
-      "to": "now"
-    },
-    "timepicker": {},
-    "timezone": "browser",
-    "title": "Logs",
-    "uid": "adyundk1tkpogf",
-    "version": 2,
-    "weekStart": ""
-  }
-  
+    ]
+  },
+  "time": {
+    "from": "2024-09-24T00:02:24.866Z",
+    "to": "2024-09-24T15:44:31.118Z"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Logs",
+  "uid": "adyundk1tkpogf",
+  "version": 8,
+  "weekStart": ""
+}

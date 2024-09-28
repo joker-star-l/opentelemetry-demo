@@ -13,6 +13,6 @@ datasources:
     isDefault: false
     jsonData:
       database: otel
-      timezone: Asia/Shanghai
+      time_zone: Asia/Shanghai
     ensureJsonData:
       password: 
