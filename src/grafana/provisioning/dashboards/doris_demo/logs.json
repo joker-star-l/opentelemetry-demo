@@ -109,7 +109,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "select \r\n$__timeGroup(timestamp,'30m') as time,\r\ncount(*) as count\r\nfrom\r\notel_logs\r\nwhere $__timeFilter(timestamp)\r\ngroup by time\r\n;\r\n",
+          "rawSql": "select \r\n$__timeGroup(timestamp,'30m') as time,\r\ncount(*) as count\r\nfrom\r\notel_logs\r\nwhere $__timeFilter(timestamp)\r\ngroup by time\r\nlimit 10000\r\n;\r\n",
           "refId": "A",
           "sql": {
             "columns": [
@@ -320,6 +320,6 @@
   "timezone": "browser",
   "title": "Logs",
   "uid": "adyundk1tkpogf",
-  "version": 10,
+  "version": 12,
   "weekStart": ""
 }
