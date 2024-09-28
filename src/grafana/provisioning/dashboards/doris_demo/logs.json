@@ -166,7 +166,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "select\r\n    $__time(timestamp),\r\n    body,\r\n    severity_text as level,\r\n    service_name as serviceName,\r\n    trace_id as traceID,\r\n    span_id as spanID,\r\n    log_attributes as logAttributes,\r\n    resource_attributes as resourceAttributes\r\nfrom otel_logs\r\nwhere $__timeFilter(timestamp)\r\nand (\r\n  \"$service_name\" = \"'all'\" or \r\n  service_name in ($service_name)\r\n)\r\nand (\r\n  '$match_value' = '' or\r\n  body $match '$match_value'\r\n)\r\nlimit 1000\r\n;\r\n",
+          "rawSql": "select\r\n    $__time(timestamp),\r\n    body,\r\n    severity_text as level,\r\n    service_name as serviceName,\r\n    trace_id as traceID,\r\n    span_id as spanID,\r\n    log_attributes as logAttributes,\r\n    resource_attributes as resourceAttributes\r\nfrom otel_logs\r\nwhere $__timeFilter(timestamp)\r\nand (\r\n  \"$service_name\" = \"'all'\" or \r\n  service_name in ($service_name)\r\n)\r\nand (\r\n  '$match_value' = '' or\r\n  body $match '$match_value'\r\n)\r\norder by timestamp desc\r\nlimit 1000\r\n;\r\n",
           "refId": "A",
           "sql": {
             "columns": [
@@ -313,13 +313,13 @@
     ]
   },
   "time": {
-    "from": "2024-09-24T00:02:24.866Z",
-    "to": "2024-09-24T15:44:31.118Z"
+    "from": "now-7d",
+    "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "Logs",
   "uid": "adyundk1tkpogf",
-  "version": 8,
+  "version": 10,
   "weekStart": ""
 }

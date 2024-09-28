@@ -1,104 +1,152 @@
 {
-    "annotations": {
-      "list": [
-        {
-          "builtIn": 1,
-          "datasource": {
-            "type": "grafana",
-            "uid": "-- Grafana --"
-          },
-          "enable": true,
-          "hide": true,
-          "iconColor": "rgba(0, 211, 255, 1)",
-          "name": "Annotations & Alerts",
-          "type": "dashboard"
-        }
-      ]
-    },
-    "editable": true,
-    "fiscalYearStartMonth": 0,
-    "graphTooltip": 0,
-    "id": 7,
-    "links": [],
-    "panels": [
+  "annotations": {
+    "list": [
       {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "webstore"
+      },
+      "gridPos": {
+        "h": 23,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "targets": [
+        {
+          "dataset": "__internal_schema",
+          "datasource": {
+            "type": "mysql",
+            "uid": "webstore"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "select\r\n    trace_id as traceID,\r\n    span_id as spanID,\r\n    parent_span_id as parentSpanID,\r\n    span_name as operationName,\r\n    service_name as serviceName,\r\n    concat('[', array_join(array_map((x,y)->json_object(\"key\", x, \"value\", y),\r\n              map_keys(cast(cast(resource_attributes as text) as map<string, string>)),\r\n              map_values(cast(cast(resource_attributes as text) as map<string, string>))\r\n    ), ','), ']') as serviceTags,\r\n    unix_timestamp(timestamp) * 1000 as startTime,\r\n    duration / 1000 as duration,\r\n    concat('[', array_join(array_map((x,y)->json_object(\"key\", x, \"value\", y),\r\n              map_keys(cast(cast(span_attributes as text) as map<string, string>)),\r\n              map_values(cast(cast(span_attributes as text) as map<string, string>))\r\n    ), ','), ']') as tags,\r\n    span_kind as kind,\r\n    case status_code when 'STATUS_CODE_OK' then 1 when 'STATUS_CODE_ERROR' then 2 else 0 end as statusCode,\r\n    status_message as statusMessage,\r\n    scope_name as instrumentationLibraryName,\r\n    scope_version as instrumentationLibraryVersion,\r\n    trace_state as traceState\r\nfrom otel_traces\r\nwhere trace_id in (\r\nselect\r\n    trace_id\r\n    from otel_traces\r\n    where $__timeFilter(timestamp)\r\n    and (\r\n      $service_name = 'all' or\r\n      service_name = $service_name \r\n    )\r\n    and (\r\n      '$trace_id' = '' or\r\n      trace_id = '$trace_id'\r\n    )\r\n    order by timestamp desc\r\n    limit 1000\r\n)\r\n;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Traces",
+      "transformations": [
+        {
+          "id": "convertFieldType",
+          "options": {
+            "conversions": [
+              {
+                "destinationType": "other",
+                "targetField": "serviceTags"
+              },
+              {
+                "destinationType": "other",
+                "targetField": "tags"
+              }
+            ],
+            "fields": {}
+          }
+        }
+      ],
+      "type": "traces"
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 39,
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "allValue": "'all'",
+        "current": {
+          "selected": false,
+          "text": "All",
+          "value": "$__all"
+        },
         "datasource": {
           "type": "mysql",
           "uid": "webstore"
         },
-        "gridPos": {
-          "h": 23,
-          "w": 24,
-          "x": 0,
-          "y": 0
+        "definition": "select service_name from otel_traces group by service_name;",
+        "description": "service_name",
+        "hide": 0,
+        "includeAll": true,
+        "label": "service_name",
+        "multi": false,
+        "name": "service_name",
+        "options": [],
+        "query": "select service_name from otel_traces group by service_name;",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "",
+          "value": ""
         },
-        "id": 1,
-        "targets": [
+        "description": "trace_id",
+        "hide": 0,
+        "label": "trace_id",
+        "name": "trace_id",
+        "options": [
           {
-            "dataset": "__internal_schema",
-            "datasource": {
-              "type": "mysql",
-              "uid": "webstore"
-            },
-            "editorMode": "code",
-            "format": "table",
-            "rawQuery": true,
-            "rawSql": "select\r\n    trace_id as traceID,\r\n    span_id as spanID,\r\n    parent_span_id as parentSpanID,\r\n    span_name as operationName,\r\n    service_name as serviceName,\r\n    concat('[', array_join(array_map((x,y)->json_object(\"key\", x, \"value\", y),\r\n              map_keys(cast(cast(resource_attributes as text) as map<string, string>)),\r\n              map_values(cast(cast(resource_attributes as text) as map<string, string>))\r\n    ), ','), ']') as serviceTags,\r\n    unix_timestamp(timestamp) * 1000 as startTime,\r\n    duration / 1000 as duration,\r\n    concat('[', array_join(array_map((x,y)->json_object(\"key\", x, \"value\", y),\r\n              map_keys(cast(cast(span_attributes as text) as map<string, string>)),\r\n              map_values(cast(cast(span_attributes as text) as map<string, string>))\r\n    ), ','), ']') as tags,\r\n    span_kind as kind,\r\n    case status_code when 'STATUS_CODE_OK' then 1 when 'STATUS_CODE_ERROR' then 2 else 0 end as statusCode,\r\n    status_message as statusMessage,\r\n    scope_name as instrumentationLibraryName,\r\n    scope_version as instrumentationLibraryVersion,\r\n    trace_state as traceState\r\nfrom otel.otel_traces\r\nwhere trace_id in (\r\nselect\r\n    trace_id\r\n    from otel.otel_traces\r\n    where $__timeFilter(timestamp)\r\n      -- and service_name = '$service_name'\r\n      -- and ('$trace_id' = '' or trace_id = '$trace_id') -- 性能\r\n    limit 1000\r\n)\r\n;",
-            "refId": "A",
-            "sql": {
-              "columns": [
-                {
-                  "parameters": [],
-                  "type": "function"
-                }
-              ],
-              "groupBy": [
-                {
-                  "property": {
-                    "type": "string"
-                  },
-                  "type": "groupBy"
-                }
-              ],
-              "limit": 50
-            }
+            "selected": true,
+            "text": "",
+            "value": ""
           }
         ],
-        "title": "Traces",
-        "transformations": [
-          {
-            "id": "convertFieldType",
-            "options": {
-              "conversions": [
-                {
-                  "destinationType": "other",
-                  "targetField": "serviceTags"
-                },
-                {
-                  "destinationType": "other",
-                  "targetField": "tags"
-                }
-              ],
-              "fields": {}
-            }
-          }
-        ],
-        "type": "traces"
+        "query": "",
+        "skipUrlSync": false,
+        "type": "textbox"
       }
-    ],
-    "schemaVersion": 39,
-    "tags": [],
-    "templating": {
-      "list": []
-    },
-    "time": {
-      "from": "now-6h",
-      "to": "now"
-    },
-    "timepicker": {},
-    "timezone": "browser",
-    "title": "Traces",
-    "uid": "edyv1zrcensw0a",
-    "version": 2,
-    "weekStart": ""
-  }
+    ]
+  },
+  "time": {
+    "from": "2024-09-24T08:00:00.000Z",
+    "to": "2024-09-24T08:20:00.000Z"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Traces",
+  "uid": "edyv1zrcensw0a",
+  "version": 5,
+  "weekStart": ""
+}
