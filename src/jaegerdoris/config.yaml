@@ -6,7 +6,8 @@ service:
 doris:
   endpoint: doris:9030
   username: admin
-  password:
+  password: 
   database: otel
   table_name: otel_traces
+  metric_table_name: otel_metrics
   timezone: Asia/Shanghai

@@ -21,16 +21,6 @@ receivers:
 
 exporters:
   debug:
-  otlphttp/prometheus:
-    endpoint: "http://prometheus:9090/api/v1/otlp"
-    tls:
-      insecure: true
-  opensearch:
-    logs_index: otel
-    http:
-      endpoint: "http://opensearch:9200"
-      tls:
-        insecure: true
   doris:
     endpoint: "http://doris:8040"
     database: otel
@@ -47,6 +37,11 @@ exporters:
     replication_num: 1
     timezone: Asia/Shanghai
     timeout: 60s
+    log_response: true
+    label_prefix: otel
+    headers:
+      load_to_single_tablet: "true"
+      max_filter_ratio: "1"
     sending_queue:
       enabled: true
       num_consumers: 10
@@ -59,21 +54,25 @@ exporters:
 
 processors:
   batch:
+    send_batch_size: 10000
+    timeout: 10s
 
 connectors:
   spanmetrics:
+    aggregation_temporality: "AGGREGATION_TEMPORALITY_DELTA"
+  servicegraph:
 
 service:
   pipelines:
-    traces:
-      receivers: [otlp]
-      processors: [batch]
-      exporters: [debug, spanmetrics, doris]
-    metrics:
-      receivers: [httpcheck/frontendproxy, redis, otlp, spanmetrics]
-      processors: [batch]
-      exporters: [otlphttp/prometheus, debug, doris]
     logs:
       receivers: [otlp]
       processors: [batch]
-      exporters: [opensearch, debug, doris]
+      exporters: [debug, doris]
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [debug, spanmetrics, doris, servicegraph]
+    metrics:
+      receivers: [httpcheck/frontendproxy, redis, otlp, spanmetrics, servicegraph]
+      processors: [batch]
+      exporters: [debug, doris]

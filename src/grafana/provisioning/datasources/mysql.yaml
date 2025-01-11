@@ -10,7 +10,7 @@ datasources:
     url: doris:9030
     user: admin
     editable: true
-    isDefault: false
+    isDefault: true
     jsonData:
       database: otel
       timezone: Asia/Shanghai

@@ -1,4 +1,47 @@
 {
+  "__inputs": [
+    {
+      "name": "DS_MYSQL",
+      "label": "mysql",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "mysql",
+      "pluginName": "MySQL"
+    }
+  ],
+  "__elements": {},
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "11.1.0"
+    },
+    {
+      "type": "datasource",
+      "id": "mysql",
+      "name": "MySQL",
+      "version": "11.1.0"
+    },
+    {
+      "type": "panel",
+      "id": "nodeGraph",
+      "name": "Node Graph",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "table",
+      "name": "Table",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "traces",
+      "name": "Traces",
+      "version": ""
+    }
+  ],
   "annotations": {
     "list": [
       {
@@ -18,6 +61,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
+  "id": null,
   "links": [],
   "panels": [
     {
@@ -25,13 +69,65 @@
         "type": "mysql",
         "uid": "webstore"
       },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto",
+              "wrapText": false
+            },
+            "filterable": true,
+            "inspect": true
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "trace_id"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 298
+              }
+            ]
+          }
+        ]
+      },
       "gridPos": {
-        "h": 23,
+        "h": 12,
         "w": 24,
         "x": 0,
         "y": 0
       },
-      "id": 1,
+      "id": 2,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "enablePagination": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "11.1.0",
       "targets": [
         {
           "dataset": "__internal_schema",
@@ -42,7 +138,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "select\r\n    trace_id as traceID,\r\n    span_id as spanID,\r\n    parent_span_id as parentSpanID,\r\n    span_name as operationName,\r\n    service_name as serviceName,\r\n    concat('[', array_join(array_map((x,y)->json_object(\"key\", x, \"value\", y),\r\n              map_keys(cast(cast(resource_attributes as text) as map<string, string>)),\r\n              map_values(cast(cast(resource_attributes as text) as map<string, string>))\r\n    ), ','), ']') as serviceTags,\r\n    unix_timestamp(timestamp) * 1000 as startTime,\r\n    duration / 1000 as duration,\r\n    concat('[', array_join(array_map((x,y)->json_object(\"key\", x, \"value\", y),\r\n              map_keys(cast(cast(span_attributes as text) as map<string, string>)),\r\n              map_values(cast(cast(span_attributes as text) as map<string, string>))\r\n    ), ','), ']') as tags,\r\n    span_kind as kind,\r\n    case status_code when 'STATUS_CODE_OK' then 1 when 'STATUS_CODE_ERROR' then 2 else 0 end as statusCode,\r\n    status_message as statusMessage,\r\n    scope_name as instrumentationLibraryName,\r\n    scope_version as instrumentationLibraryVersion,\r\n    trace_state as traceState\r\nfrom otel_traces\r\nwhere trace_id in (\r\nselect\r\n    trace_id\r\n    from otel_traces\r\n    where $__timeFilter(timestamp)\r\n    and (\r\n      $service_name = 'all' or\r\n      service_name = $service_name \r\n    )\r\n    and (\r\n      '$trace_id' = '' or\r\n      trace_id = '$trace_id'\r\n    )\r\n    order by timestamp desc\r\n    limit 1000\r\n)\r\n;",
+          "rawSql": "with a as (\r\nselect trace_id, min(timestamp) as t\r\n  from otel_traces\r\n  where $__timeFilter(timestamp)\r\n    and service_name = '$service_name'\r\n    and ($operation = 'all' or span_name = $operation)\r\n    and ($status = 'all' or status_code = $status)\r\n  group by trace_id\r\n  order by t desc\r\n  limit 1000\r\n)\r\nselect\r\n    unix_timestamp(min(timestamp)) as time,\r\n    trace_id,\r\n    collect_set(service_name) as services,\r\n    count(*) as spans,\r\n    sum(if('STATUS_CODE_ERROR' = status_code, 1, 0)) as error_spans,\r\n    max(duration) / 1000 as 'duration (ms)'\r\nfrom otel_traces\r\nwhere trace_id in (select trace_id from a)\r\ngroup by trace_id\r\nORDER BY time desc\r\n;\r\n",
           "refId": "A",
           "sql": {
             "columns": [
@@ -64,6 +160,52 @@
         }
       ],
       "title": "Traces",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "webstore"
+      },
+      "gridPos": {
+        "h": 20,
+        "w": 24,
+        "x": 0,
+        "y": 12
+      },
+      "id": 1,
+      "targets": [
+        {
+          "dataset": "__internal_schema",
+          "datasource": {
+            "type": "mysql",
+            "uid": "webstore"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "select\r\n    trace_id as traceID,\r\n    span_id as spanID,\r\n    parent_span_id as parentSpanID,\r\n    span_name as operationName,\r\n    service_name as serviceName,\r\n    concat('[', array_join(array_map((x,y)->json_object(\"key\", x, \"value\", y),\r\n              map_keys(cast(cast(resource_attributes as text) as map<string, string>)),\r\n              map_values(cast(cast(resource_attributes as text) as map<string, string>))\r\n    ), ','), ']') as serviceTags,\r\n    unix_timestamp(timestamp) * 1000 as startTime,\r\n    duration / 1000 as duration,\r\n    concat('[', array_join(array_map((x,y)->json_object(\"key\", x, \"value\", y),\r\n              map_keys(cast(cast(span_attributes as text) as map<string, string>)),\r\n              map_values(cast(cast(span_attributes as text) as map<string, string>))\r\n    ), ','), ']') as tags,\r\n    span_kind as kind,\r\n    case status_code when 'STATUS_CODE_OK' then 1 when 'STATUS_CODE_ERROR' then 2 else 0 end as statusCode,\r\n    status_message as statusMessage,\r\n    scope_name as instrumentationLibraryName,\r\n    scope_version as instrumentationLibraryVersion,\r\n    trace_state as traceState\r\nfrom otel_traces\r\nwhere trace_id = '$trace_id'\r\n;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Trace",
       "transformations": [
         {
           "id": "convertFieldType",
@@ -83,6 +225,75 @@
         }
       ],
       "type": "traces"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "webstore"
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 32
+      },
+      "id": 3,
+      "options": {
+        "edges": {},
+        "nodes": {
+          "arcs": []
+        }
+      },
+      "pluginVersion": "11.1.0",
+      "targets": [
+        {
+          "dataset": "__internal_schema",
+          "datasource": {
+            "type": "mysql",
+            "uid": "webstore"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\r\n    cast(attributes['client'] as string) AS source,\r\n    cast(attributes['server'] as string) AS target,\r\n    max(if(attributes['failed'] = 0, value, null)) - min(if(attributes['failed'] = 0, value, null)) as detail__success_count,\r\n    max(if(attributes['failed'] = 1, value, null)) - min(if(attributes['failed'] = 1, value, null)) as detail__failed_count,\r\n    if(max(if(attributes['failed'] = 1, value, null)) - min(if(attributes['failed'] = 1, value, null)) > 0, 'red', 'green') as color\r\nFROM otel_metrics_sum\r\nWHERE metric_name = 'traces_service_graph_request_total'\r\n and $__timeFilter(timestamp) \r\nGROUP BY source, target\r\n;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Graph",
+      "transformations": [
+        {
+          "id": "calculateField",
+          "options": {
+            "alias": "id",
+            "binary": {
+              "left": "source",
+              "right": "target"
+            },
+            "mode": "binary",
+            "reduce": {
+              "reducer": "sum"
+            }
+          }
+        }
+      ],
+      "type": "nodeGraph"
     }
   ],
   "refresh": "",
@@ -91,30 +302,84 @@
   "templating": {
     "list": [
       {
+        "current": {},
+        "datasource": {
+          "type": "mysql",
+          "uid": "webstore"
+        },
+        "definition": "select distinct service_name from otel_traces;",
+        "hide": 0,
+        "includeAll": false,
+        "label": "service_name",
+        "multi": false,
+        "name": "service_name",
+        "options": [],
+        "query": "select distinct service_name from otel_traces;",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 5,
+        "type": "query"
+      },
+      {
+        "allValue": "'all'",
+        "current": {},
+        "datasource": {
+          "type": "mysql",
+          "uid": "webstore"
+        },
+        "definition": "select span_name from otel_traces where service_name = '$service_name' group by span_name;",
+        "hide": 0,
+        "includeAll": true,
+        "label": "operation",
+        "multi": false,
+        "name": "operation",
+        "options": [],
+        "query": "select span_name from otel_traces where service_name = '$service_name' group by span_name;",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 5,
+        "type": "query"
+      },
+      {
         "allValue": "'all'",
         "current": {
           "selected": false,
           "text": "All",
           "value": "$__all"
         },
-        "datasource": {
-          "type": "mysql",
-          "uid": "webstore"
-        },
-        "definition": "select service_name from otel_traces group by service_name;",
-        "description": "service_name",
         "hide": 0,
         "includeAll": true,
-        "label": "service_name",
+        "label": "status",
         "multi": false,
-        "name": "service_name",
-        "options": [],
-        "query": "select service_name from otel_traces group by service_name;",
-        "refresh": 1,
-        "regex": "",
+        "name": "status",
+        "options": [
+          {
+            "selected": true,
+            "text": "All",
+            "value": "$__all"
+          },
+          {
+            "selected": false,
+            "text": "error",
+            "value": "STATUS_CODE_ERROR"
+          },
+          {
+            "selected": false,
+            "text": "ok",
+            "value": "STATUS_CODE_OK"
+          },
+          {
+            "selected": false,
+            "text": "unset",
+            "value": "STATUS_CODE_UNSET"
+          }
+        ],
+        "query": "error : STATUS_CODE_ERROR, ok : STATUS_CODE_OK, unset : STATUS_CODE_UNSET",
+        "queryValue": "",
         "skipUrlSync": false,
-        "sort": 1,
-        "type": "query"
+        "type": "custom"
       },
       {
         "current": {
@@ -122,7 +387,6 @@
           "text": "",
           "value": ""
         },
-        "description": "trace_id",
         "hide": 0,
         "label": "trace_id",
         "name": "trace_id",
@@ -133,20 +397,20 @@
             "value": ""
           }
         ],
-        "query": "",
+        "query": "0",
         "skipUrlSync": false,
         "type": "textbox"
       }
     ]
   },
   "time": {
-    "from": "2024-09-24T08:00:00.000Z",
-    "to": "2024-09-24T08:20:00.000Z"
+    "from": "now-24h",
+    "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "Traces",
-  "uid": "edyv1zrcensw0a",
-  "version": 5,
+  "uid": "fdslcvdj6i2o0c",
+  "version": 33,
   "weekStart": ""
 }
